@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comercio Exterior — SEMAR</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--color-primary:#1a3a5c;--color-primary-light:#2a5080;--color-accent:#d4a017;--color-accent-light:#f0c040;--color-danger:#c0392b;--color-success:#27ae60;--color-warning:#e67e22;--color-info:#2980b9;--color-bg:#f4f6f9;--color-surface:#ffffff;--color-border:#dde2ec;--color-text:#1c2b3a;--color-text-muted:#6b7a90;--sidebar-width:220px;--topbar-height:60px;--radius:8px;--shadow:0 2px 8px rgba(0,0,0,.08);--shadow-md:0 4px 16px rgba(0,0,0,.12)}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--color-bg);color:var(--color-text);font-size:14px;line-height:1.5}
+#app{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-width);background:var(--color-primary);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sidebar-logo{display:flex;align-items:center;gap:10px;padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
+.logo-mark{width:36px;height:36px;background:var(--color-accent);color:var(--color-primary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex-shrink:0}
+.logo-title{display:block;color:#fff;font-weight:700;font-size:15px;line-height:1.2}
+.logo-sub{display:block;color:rgba(255,255,255,.55);font-size:10px;text-transform:uppercase;letter-spacing:.5px}
+.sidebar-nav{padding:12px 0;flex:1}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;color:rgba(255,255,255,.7);text-decoration:none;font-size:13.5px;transition:all .15s;border-left:3px solid transparent}
+.nav-item svg{width:18px;height:18px;fill:currentColor;flex-shrink:0}
+.nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:var(--color-accent)}
+.main-content{margin-left:var(--sidebar-width);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{height:var(--topbar-height);background:var(--color-surface);border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:50}
+.topbar-title{font-size:17px;font-weight:600;color:var(--color-primary)}
+.topbar-actions{display:flex;gap:8px}
+.view-container{padding:24px;flex:1}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:none;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn svg{width:16px;height:16px;fill:currentColor}
+.btn-primary{background:var(--color-primary);color:#fff}
+.btn-primary:hover{background:var(--color-primary-light)}
+.btn-accent{background:var(--color-accent);color:var(--color-primary)}
+.btn-accent:hover{background:var(--color-accent-light)}
+.btn-ghost{background:transparent;color:var(--color-text-muted);border:1px solid var(--color-border)}
+.btn-ghost:hover{background:var(--color-bg);color:var(--color-text)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.card{background:var(--color-surface);border-radius:var(--radius);border:1px solid var(--color-border);box-shadow:var(--shadow)}
+.card-header{padding:14px 18px;border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-weight:600;font-size:14px}
+.card-body{padding:18px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.kpi-card{background:var(--color-surface);border-radius:var(--radius);border:1px solid var(--color-border);padding:18px 20px;display:flex;align-items:center;gap:14px}
+.kpi-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.kpi-icon svg{width:22px;height:22px;fill:#fff}
+.kpi-icon.blue{background:var(--color-info)}
+.kpi-icon.green{background:var(--color-success)}
+.kpi-icon.orange{background:var(--color-warning)}
+.kpi-icon.red{background:var(--color-danger)}
+.kpi-icon.navy{background:var(--color-primary)}
+.kpi-value{font-size:24px;font-weight:700;line-height:1}
+.kpi-label{font-size:12px;color:var(--color-text-muted);margin-top:2px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px 14px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--color-text-muted);border-bottom:2px solid var(--color-border);white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--color-border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(0,0,0,.018)}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+.badge-borrador,.badge-pendiente{background:#eef2f7;color:#5a6a7e}
+.badge-confirmado,.badge-en_produccion{background:#e8f4fd;color:#1a6fa8}
+.badge-embarcado,.badge-en_transito{background:#fff8e6;color:#b07d00}
+.badge-en_puerto,.badge-en_aduana{background:#fff0e6;color:#b35900}
+.badge-liberado,.badge-parcial{background:#e8f5e9;color:#1e7e34}
+.badge-entregado,.badge-pagado{background:#e9fbe9;color:#155724}
+.badge-cancelado{background:#fde8e8;color:#8b1a1a}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+label{font-size:12px;font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.4px}
+input,select,textarea{padding:8px 10px;border:1px solid var(--color-border);border-radius:var(--radius);font-size:13.5px;background:var(--color-surface);color:var(--color-text);transition:border-color .15s;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--color-primary)}
+textarea{resize:vertical;min-height:70px}
+.form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--color-border)}
+.filter-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.filter-bar input,.filter-bar select{max-width:200px}
+.filter-bar .spacer{flex:1}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px}
+.modal{background:var(--color-surface);border-radius:12px;width:100%;max-width:680px;max-height:90vh;display:flex;flex-direction:column;box-shadow:var(--shadow-md)}
+.modal-header{padding:16px 20px;border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-header h3{font-size:15px;font-weight:600}
+.modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--color-text-muted);line-height:1;padding:0 4px}
+.modal-close:hover{color:var(--color-text)}
+.modal-body{padding:20px;overflow-y:auto}
+.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px 20px}
+.detail-item .detail-label{font-size:11px;font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.detail-item .detail-value{font-size:14px}
+.empty-state{text-align:center;padding:48px 20px;color:var(--color-text-muted)}
+.empty-state p{font-size:14px}
+.alert{padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-bottom:12px}
+.alert-warning{background:#fff8e6;border:1px solid #f0c040;color:#7a5500}
+.alert-danger{background:#fdecea;border:1px solid #f5a5a5;color:#8b1a1a}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--color-border);border-radius:3px}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">S</div>
+      <div class="logo-text">
+        <span class="logo-title">SEMAR</span>
+        <span class="logo-sub">Comercio Exterior</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-view="dashboard">
+        <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>Dashboard
+      </a>
+      <a href="#" class="nav-item" data-view="proveedores">
+        <svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>Proveedores
+      </a>
+      <a href="#" class="nav-item" data-view="pedidos">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>Pedidos / OC
+      </a>
+      <a href="#" class="nav-item" data-view="embarques">
+        <svg viewBox="0 0 24 24"><path d="M20 21c-1.39 0-2.78-.47-4-1.32-2.44 1.71-5.56 1.71-8 0C6.78 20.53 5.39 21 4 21H2v2h2c1.38 0 2.74-.35 4-.99 2.52 1.29 5.48 1.29 8 0 1.26.65 2.62.99 4 .99h2v-2h-2zM3.95 19H4c1.6 0 3.02-.88 4-2 .98 1.12 2.4 2 4 2s3.02-.88 4-2c.98 1.12 2.4 2 4 2h.05l1.89-6.68c.08-.26.06-.54-.06-.78s-.34-.42-.6-.5L20 10.62V6c0-1.1-.9-2-2-2h-3V1H9v3H6c-1.1 0-2 .9-2 2v4.62l-1.29.42c-.26.08-.48.26-.6.5s-.15.52-.06.78L3.95 19zM6 6h12v3.97L12 8 6 9.97V6z"/></svg>Embarques
+      </a>
+      <a href="#" class="nav-item" data-view="documentos">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>Documentación
+      </a>
+      <a href="#" class="nav-item" data-view="facturas">
+        <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>Facturas y Pagos
+      </a>
+    </nav>
+    <div style="padding:12px 16px;border-top:1px solid rgba(255,255,255,.1)">
+      <button onclick="resetAndSeed()" style="background:none;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.5);padding:6px 10px;border-radius:6px;font-size:11px;cursor:pointer;width:100%;text-align:left">↺ Recargar datos</button>
+    </div>
+  </aside>
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-title" id="page-title">Dashboard</div>
+      <div class="topbar-actions" id="topbar-actions"></div>
+    </header>
+    <div class="view-container" id="view-container"></div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="modal-overlay" style="display:none">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <h3 id="modal-title"></h3>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ── DB / API ──────────────────────────────────────────────────────────────────
+const DB={_get(k){try{return JSON.parse(localStorage.getItem('semar_'+k)||'[]')}catch{return[]}},_set(k,d){localStorage.setItem('semar_'+k,JSON.stringify(d))},_nextId(k){const i=this._get(k);return i.length?Math.max(...i.map(x=>x.id||0))+1:1},now(){return new Date().toISOString()},list(t,f={}){let i=this._get(t);for(const[k,v]of Object.entries(f)){if(v!==undefined&&v!=='')i=i.filter(x=>String(x[k])===String(v))}return i},get(t,id){return this._get(t).find(i=>i.id===Number(id))||null},insert(t,d){const i=this._get(t);const x={...d,id:this._nextId(t),created_at:this.now(),updated_at:this.now()};i.push(x);this._set(t,i);return x.id},update(t,id,d){const i=this._get(t);const idx=i.findIndex(x=>x.id===Number(id));if(idx>=0){i[idx]={...i[idx],...d,updated_at:this.now()};this._set(t,i)}return idx>=0},softDelete(t,id){return this.update(t,id,{activo:0})}};
+
+const API={
+  getDashboard(){
+    const provs=DB.list('proveedores',{activo:1}),peds=DB.list('pedidos'),embs=DB.list('embarques'),facts=DB.list('facturas'),docs=DB.list('documentos');
+    const pedsAct=peds.filter(p=>!['ENTREGADO','CANCELADO'].includes(p.estado));
+    const embsAct=embs.filter(e=>e.estado!=='ENTREGADO');
+    const factsP=facts.filter(f=>['PENDIENTE','PARCIAL'].includes(f.estado_pago));
+    const deuda=factsP.reduce((s,f)=>s+(f.importe||0),0);
+    const ec={};peds.forEach(p=>{ec[p.estado]=(ec[p.estado]||0)+1});
+    const ped_estado=Object.entries(ec).map(([estado,cantidad])=>({estado,cantidad}));
+    const embA=embsAct.slice(0,10).map(e=>{const p=e.pedido_id?DB.get('pedidos',e.pedido_id):null;const pv=p?.proveedor_id?DB.get('proveedores',p.proveedor_id):null;return{...e,numero_oc:p?.numero_oc,proveedor_nombre:pv?.razon_social}}).sort((a,b)=>(a.eta||'9999')<(b.eta||'9999')?-1:1);
+    const facP=factsP.slice(0,10).map(f=>({...f,proveedor_nombre:f.proveedor_id?DB.get('proveedores',f.proveedor_id)?.razon_social:null})).sort((a,b)=>(a.fecha_vencimiento||'9999')<(b.fecha_vencimiento||'9999')?-1:1);
+    return{totales:{proveedores:provs.length,pedidos_activos:pedsAct.length,embarques_activos:embsAct.length,deuda_total:deuda},pedidos_por_estado:ped_estado,embarques_activos:embA,facturas_pendientes:facP,documentos_pendientes:docs.filter(d=>d.estado==='PENDIENTE').length};
+  },
+  getProveedores(f={}){let i=DB.list('proveedores');if(f.activo!==undefined)i=i.filter(p=>p.activo===(f.activo==='true'||f.activo===true?1:0));if(f.pais)i=i.filter(p=>p.pais===f.pais);return i.sort((a,b)=>a.razon_social.localeCompare(b.razon_social))},
+  getProveedor(id){return DB.get('proveedores',id)},
+  saveProveedor(d,id=null){if(id){DB.update('proveedores',id,d);return id}return DB.insert('proveedores',{...d,activo:1})},
+  getPedidos(f={}){let i=DB.list('pedidos');if(f.estado)i=i.filter(p=>p.estado===f.estado);return i.map(p=>{const pv=p.proveedor_id?DB.get('proveedores',p.proveedor_id):null;return{...p,proveedor_nombre:pv?.razon_social,proveedor_pais:pv?.pais}}).sort((a,b)=>b.fecha_emision<a.fecha_emision?-1:1)},
+  getPedido(id){const p=DB.get('pedidos',id);if(!p)return null;const pv=p.proveedor_id?DB.get('proveedores',p.proveedor_id):null;p.proveedor_nombre=pv?.razon_social;p.proveedor_pais=pv?.pais;p.items=DB.list('pedido_items').filter(i=>i.pedido_id===Number(id));return p},
+  savePedido(d){const{items,...pd}=d;const tot=(items||[]).reduce((s,i)=>s+(i.cantidad*i.precio_unitario),0);const id=DB.insert('pedidos',{...pd,estado:'BORRADOR',importe_total:tot});if(items)items.forEach(i=>DB.insert('pedido_items',{...i,pedido_id:id}));return id},
+  updatePedidoEstado(id,estado){DB.update('pedidos',id,{estado})},
+  getEmbarques(f={}){let i=DB.list('embarques');if(f.estado)i=i.filter(e=>e.estado===f.estado);return i.map(e=>{const p=e.pedido_id?DB.get('pedidos',e.pedido_id):null;const pv=p?.proveedor_id?DB.get('proveedores',p.proveedor_id):null;return{...e,numero_oc:p?.numero_oc,proveedor_nombre:pv?.razon_social}}).sort((a,b)=>(a.eta||'9999')<(b.eta||'9999')?-1:1)},
+  getEmbarque(id){const e=DB.get('embarques',id);if(!e)return null;const p=e.pedido_id?DB.get('pedidos',e.pedido_id):null;const pv=p?.proveedor_id?DB.get('proveedores',p.proveedor_id):null;e.numero_oc=p?.numero_oc;e.proveedor_nombre=pv?.razon_social;e.documentos=DB.list('documentos').filter(d=>d.embarque_id===Number(id));e.despacho=DB.list('despachos').find(d=>d.embarque_id===Number(id))||null;return e},
+  saveEmbarque(d){return DB.insert('embarques',{...d,estado:'EN_TRANSITO'})},
+  updateEmbarqueEstado(id,estado,fecha){DB.update('embarques',id,{estado,...(fecha?{fecha_arribo_real:fecha}:{})})},
+  getDocumentos(f={}){let i=DB.list('documentos');if(f.embarque_id)i=i.filter(d=>String(d.embarque_id)===String(f.embarque_id));if(f.tipo_documento)i=i.filter(d=>d.tipo_documento===f.tipo_documento);if(f.estado)i=i.filter(d=>d.estado===f.estado);return i.map(d=>{const e=d.embarque_id?DB.get('embarques',d.embarque_id):null;const p=d.pedido_id?DB.get('pedidos',d.pedido_id):null;return{...d,numero_embarque:e?.numero_embarque,numero_oc:p?.numero_oc}}).sort((a,b)=>b.created_at<a.created_at?-1:1)},
+  saveDocumento(d){return DB.insert('documentos',{...d,estado:'PENDIENTE'})},
+  updateDocumentoEstado(id,estado){DB.update('documentos',id,{estado})},
+  getFacturas(f={}){let i=DB.list('facturas');if(f.estado_pago)i=i.filter(x=>x.estado_pago===f.estado_pago);const pagos=DB.list('pagos');return i.map(x=>{const pv=x.proveedor_id?DB.get('proveedores',x.proveedor_id):null;const p=x.pedido_id?DB.get('pedidos',x.pedido_id):null;const pagado=pagos.filter(pg=>pg.factura_id===x.id).reduce((s,pg)=>s+pg.importe,0);return{...x,proveedor_nombre:pv?.razon_social,numero_oc:p?.numero_oc,pagado}}).sort((a,b)=>(a.fecha_vencimiento||'9999')<(b.fecha_vencimiento||'9999')?-1:1)},
+  getFactura(id){const f=DB.get('facturas',id);if(!f)return null;const pv=f.proveedor_id?DB.get('proveedores',f.proveedor_id):null;const p=f.pedido_id?DB.get('pedidos',f.pedido_id):null;f.proveedor_nombre=pv?.razon_social;f.numero_oc=p?.numero_oc;f.pagos=DB.list('pagos').filter(pg=>pg.factura_id===Number(id));return f},
+  saveFactura(d){const gs=d.tipo_cambio?d.importe*d.tipo_cambio:null;return DB.insert('facturas',{...d,importe_gs:gs,estado_pago:'PENDIENTE'})},
+  registrarPago(fid,d){DB.insert('pagos',{...d,factura_id:Number(fid)});const f=DB.get('facturas',fid);const tot=DB.list('pagos').filter(p=>p.factura_id===Number(fid)).reduce((s,p)=>s+p.importe,0);DB.update('facturas',fid,{estado_pago:tot>=f.importe?'PAGADO':'PARCIAL'})}
+};
+
+// ── Utils ─────────────────────────────────────────────────────────────────────
+function fmtDate(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('es-PY',{day:'2-digit',month:'2-digit',year:'numeric'})}
+function fmtMoney(n,m){if(n==null||n==='')return'—';const s=m==='USD'?'USD ':m==='PYG'?'Gs. ':(m||'')+' ';if(m==='PYG')return s+Math.round(n).toLocaleString('es-PY');return s+Number(n).toLocaleString('es-PY',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function badge(e){const k=(e||'').toLowerCase().replace(/ /g,'_');return`<span class="badge badge-${k}">${e}</span>`}
+function openModal(t,h){document.getElementById('modal-title').textContent=t;document.getElementById('modal-body').innerHTML=h;document.getElementById('modal-overlay').style.display='flex'}
+function closeModal(){document.getElementById('modal-overlay').style.display='none'}
+document.getElementById('modal-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal()});
+function showToast(msg,type='ok'){const t=document.createElement('div');t.style.cssText=`position:fixed;bottom:20px;right:20px;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.15);transition:opacity .3s;background:${type==='ok'?'#27ae60':'#c0392b'};color:#fff`;t.textContent=msg;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300)},2500)}
+function etaDaysLabel(eta){if(!eta)return'';const d=Math.round((new Date(eta)-new Date())/86400000);if(d<0)return`<span style="color:var(--color-danger);font-size:11px">${Math.abs(d)}d vencido</span>`;if(d===0)return`<span style="color:var(--color-warning);font-size:11px">Hoy</span>`;if(d<=7)return`<span style="color:var(--color-warning);font-size:11px">${d}d</span>`;return`<span style="color:var(--color-text-muted);font-size:11px">${d}d</span>`}
+function formData(f){const d={};new FormData(f).forEach((v,k)=>{d[k]=v===''?null:v});return d}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+function viewDashboard(){
+  document.getElementById('page-title').textContent='Dashboard';
+  document.getElementById('topbar-actions').innerHTML='';
+  const d=API.getDashboard(),t=d.totales;
+  const EP=['BORRADOR','CONFIRMADO','EN_PRODUCCION','EMBARCADO','EN_ADUANA','ENTREGADO','CANCELADO'];
+  const em={};(d.pedidos_por_estado||[]).forEach(e=>em[e.estado]=e);
+  document.getElementById('view-container').innerHTML=`
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-icon navy"><svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg></div><div><div class="kpi-value">${t.proveedores||0}</div><div class="kpi-label">Proveedores activos</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon blue"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></div><div><div class="kpi-value">${t.pedidos_activos||0}</div><div class="kpi-label">Pedidos activos</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon orange"><svg viewBox="0 0 24 24"><path d="M20 21c-1.39 0-2.78-.47-4-1.32-2.44 1.71-5.56 1.71-8 0C6.78 20.53 5.39 21 4 21H2v2h2c1.38 0 2.74-.35 4-.99 2.52 1.29 5.48 1.29 8 0 1.26.65 2.62.99 4 .99h2v-2h-2zM3.95 19H4c1.6 0 3.02-.88 4-2 .98 1.12 2.4 2 4 2s3.02-.88 4-2c.98 1.12 2.4 2 4 2h.05l1.89-6.68c.08-.26.06-.54-.06-.78s-.34-.42-.6-.5L20 10.62V6c0-1.1-.9-2-2-2h-3V1H9v3H6c-1.1 0-2 .9-2 2v4.62l-1.29.42c-.26.08-.48.26-.6.5s-.15.52-.06.78L3.95 19zM6 6h12v3.97L12 8 6 9.97V6z"/></svg></div><div><div class="kpi-value">${t.embarques_activos||0}</div><div class="kpi-label">Embarques en tránsito</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon red"><svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg></div><div><div class="kpi-value">${fmtMoney(t.deuda_total,'USD')}</div><div class="kpi-label">Facturas pendientes</div></div></div>
+    </div>
+    <div class="grid-2" style="gap:20px">
+      <div class="card"><div class="card-header"><span class="card-title">Embarques en curso</span></div><div class="table-wrap">
+        ${d.embarques_activos&&d.embarques_activos.length?`<table><thead><tr><th>N° Embarque</th><th>Proveedor</th><th>Estado</th><th>ETA</th></tr></thead><tbody>${d.embarques_activos.map(e=>`<tr><td><strong>${e.numero_embarque}</strong></td><td>${e.proveedor_nombre||'—'}</td><td>${badge(e.estado)}</td><td>${fmtDate(e.eta)} ${etaDaysLabel(e.eta)}</td></tr>`).join('')}</tbody></table>`:'<div class="empty-state"><p>Sin embarques activos</p></div>'}
+      </div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Facturas pendientes de pago</span></div><div class="table-wrap">
+        ${d.facturas_pendientes&&d.facturas_pendientes.length?`<table><thead><tr><th>Factura</th><th>Proveedor</th><th>Importe</th><th>Venc.</th></tr></thead><tbody>${d.facturas_pendientes.map(f=>{const v=f.fecha_vencimiento&&f.fecha_vencimiento<new Date().toISOString().slice(0,10);return`<tr><td><strong>${f.numero_factura}</strong></td><td>${f.proveedor_nombre||'—'}</td><td>${fmtMoney(f.importe,f.moneda)}</td><td style="${v?'color:var(--color-danger);font-weight:600':''}">${fmtDate(f.fecha_vencimiento)}</td></tr>`}).join('')}</tbody></table>`:'<div class="empty-state"><p>Sin facturas pendientes</p></div>'}
+      </div></div>
+    </div>
+    <div class="card" style="margin-top:20px"><div class="card-header"><span class="card-title">Estado de pedidos</span></div><div class="card-body"><div style="display:flex;gap:12px;flex-wrap:wrap">${EP.map(e=>{const i=em[e];return`<div style="background:var(--color-bg);border-radius:8px;padding:10px 16px;text-align:center;min-width:100px"><div style="font-size:20px;font-weight:700">${i?i.cantidad:0}</div><div style="font-size:11px;color:var(--color-text-muted)">${e.replace(/_/g,' ')}</div></div>`}).join('')}</div></div></div>
+    ${d.documentos_pendientes>0?`<div class="alert alert-warning" style="margin-top:16px">⚠ Hay <strong>${d.documentos_pendientes}</strong> documento(s) aduaneros pendientes de recepción.</div>`:''}`;
+}
+
+// ── Proveedores ───────────────────────────────────────────────────────────────
+function viewProveedores(){document.getElementById('page-title').textContent='Proveedores';document.getElementById('topbar-actions').innerHTML=`<button class="btn btn-primary" onclick="formNuevoProveedor()"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Nuevo proveedor</button>`;renderTablaProveedores()}
+function renderTablaProveedores(){const p=API.getProveedores({activo:true});window._proveedores=p;const ps=[...new Set(p.map(x=>x.pais))].sort();document.getElementById('view-container').innerHTML=`<div class="filter-bar"><input type="search" id="buscar-prov" placeholder="Buscar proveedor..." oninput="filtrarProveedores()" style="max-width:260px"><select id="filtro-pais" onchange="filtrarProveedores()"><option value="">Todos los países</option>${ps.map(x=>`<option>${x}</option>`).join('')}</select></div><div class="card"><div class="table-wrap"><table id="tabla-proveedores"><thead><tr><th>Código</th><th>Razón Social</th><th>País</th><th>Moneda</th><th>Cond. Pago</th><th>Plazo</th><th>Contacto</th><th></th></tr></thead><tbody>${renderProveedoresRows(p)}</tbody></table></div></div>`}
+function renderProveedoresRows(p){if(!p.length)return`<tr><td colspan="8"><div class="empty-state"><p>No hay proveedores registrados</p></div></td></tr>`;return p.map(x=>`<tr><td><strong>${x.codigo}</strong></td><td>${x.razon_social}</td><td>${x.pais}</td><td>${x.moneda||'USD'}</td><td>${x.condicion_pago||'—'}</td><td>${x.plazo_entrega_dias?x.plazo_entrega_dias+'d':'—'}</td><td>${x.contacto||'—'}<br><small style="color:var(--color-text-muted)">${x.email||''}</small></td><td><button class="btn btn-ghost btn-sm" onclick="editarProveedor(${x.id})">Editar</button></td></tr>`).join('')}
+function filtrarProveedores(){const b=document.getElementById('buscar-prov').value.toLowerCase(),p=document.getElementById('filtro-pais').value;document.querySelector('#tabla-proveedores tbody').innerHTML=renderProveedoresRows(window._proveedores.filter(x=>(!b||x.razon_social.toLowerCase().includes(b)||x.codigo.toLowerCase().includes(b))&&(!p||x.pais===p)))}
+function formProveedor(t,p={}){openModal(t,`<form id="form-prov" onsubmit="guardarProveedor(event,${p.id||'null'})"><div class="form-grid"><div class="form-group"><label>Código *</label><input name="codigo" value="${p.codigo||''}" required ${p.id?'readonly':''}></div><div class="form-group full"><label>Razón Social *</label><input name="razon_social" value="${p.razon_social||''}" required></div><div class="form-group"><label>País *</label><input name="pais" value="${p.pais||''}" required placeholder="Ej: China, Brasil"></div><div class="form-group"><label>Moneda</label><select name="moneda">${['USD','EUR','BRL','CNY','JPY'].map(m=>`<option ${p.moneda===m?'selected':''}>${m}</option>`).join('')}</select></div><div class="form-group"><label>Contacto</label><input name="contacto" value="${p.contacto||''}"></div><div class="form-group"><label>Email</label><input name="email" type="email" value="${p.email||''}"></div><div class="form-group"><label>Teléfono</label><input name="telefono" value="${p.telefono||''}"></div><div class="form-group"><label>Condición de pago</label><select name="condicion_pago"><option value="">—</option>${['Contado','30 días','60 días','90 días','LC a la vista','LC 30 días','LC 60 días','Anticipo 30%'].map(c=>`<option ${p.condicion_pago===c?'selected':''}>${c}</option>`).join('')}</select></div><div class="form-group"><label>Plazo entrega (días)</label><input name="plazo_entrega_dias" type="number" value="${p.plazo_entrega_dias||''}"></div><div class="form-group full"><label>Notas</label><textarea name="notas">${p.notas||''}</textarea></div></div><div class="form-actions"><button type="button" class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button type="submit" class="btn btn-primary">Guardar</button></div></form>`)}
+function formNuevoProveedor(){formProveedor('Nuevo proveedor')}
+function editarProveedor(id){formProveedor('Editar proveedor',API.getProveedor(id))}
+function guardarProveedor(e,id){e.preventDefault();const d=formData(e.target);if(d.plazo_entrega_dias)d.plazo_entrega_dias=Number(d.plazo_entrega_dias);API.saveProveedor(d,id);closeModal();showToast('Proveedor guardado');renderTablaProveedores()}
+
+// ── Pedidos ───────────────────────────────────────────────────────────────────
+function viewPedidos(){document.getElementById('page-title').textContent='Pedidos / Órdenes de Compra';document.getElementById('topbar-actions').innerHTML=`<button class="btn btn-primary" onclick="formNuevoPedido()"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Nueva OC</button>`;renderTablaPedidos()}
+function renderTablaPedidos(){const p=API.getPedidos();window._pedidos=p;const es=['','BORRADOR','CONFIRMADO','EN_PRODUCCION','EMBARCADO','EN_ADUANA','ENTREGADO','CANCELADO'];document.getElementById('view-container').innerHTML=`<div class="filter-bar"><input type="search" id="buscar-ped" placeholder="Buscar OC o proveedor..." oninput="filtrarPedidos()" style="max-width:260px"><select id="filtro-estado-ped" onchange="filtrarPedidos()">${es.map(e=>`<option value="${e}">${e||'Todos los estados'}</option>`).join('')}</select></div><div class="card"><div class="table-wrap"><table id="tabla-pedidos"><thead><tr><th>N° OC</th><th>Proveedor</th><th>País</th><th>Fecha</th><th>Entrega est.</th><th>Incoterm</th><th>Total</th><th>Estado</th><th></th></tr></thead><tbody>${renderPedidosRows(p)}</tbody></table></div></div>`}
+function renderPedidosRows(p){if(!p.length)return`<tr><td colspan="9"><div class="empty-state"><p>No hay pedidos registrados</p></div></td></tr>`;return p.map(x=>`<tr><td><strong>${x.numero_oc}</strong></td><td>${x.proveedor_nombre||'—'}</td><td>${x.proveedor_pais||'—'}</td><td>${fmtDate(x.fecha_emision)}</td><td>${fmtDate(x.fecha_entrega_estimada)}</td><td>${x.incoterm||'—'}</td><td>${fmtMoney(x.importe_total,x.moneda)}</td><td>${badge(x.estado)}</td><td><button class="btn btn-ghost btn-sm" onclick="verPedido(${x.id})">Ver</button> <button class="btn btn-ghost btn-sm" onclick="cambiarEstadoPedido(${x.id},'${x.estado}')">Estado</button></td></tr>`).join('')}
+function filtrarPedidos(){const b=document.getElementById('buscar-ped').value.toLowerCase(),e=document.getElementById('filtro-estado-ped').value;document.querySelector('#tabla-pedidos tbody').innerHTML=renderPedidosRows(window._pedidos.filter(p=>(!b||p.numero_oc.toLowerCase().includes(b)||(p.proveedor_nombre||'').toLowerCase().includes(b))&&(!e||p.estado===e)))}
+function verPedido(id){const p=API.getPedido(id);const ih=p.items&&p.items.length?`<table style="margin-top:8px"><thead><tr><th>Código</th><th>Descripción</th><th>Cant.</th><th>Unidad</th><th>P.Unit.</th><th>Importe</th></tr></thead><tbody>${p.items.map(i=>`<tr><td>${i.codigo_producto||'—'}</td><td>${i.descripcion}</td><td>${i.cantidad}</td><td>${i.unidad||'UN'}</td><td>${fmtMoney(i.precio_unitario,p.moneda)}</td><td>${fmtMoney(i.cantidad*i.precio_unitario,p.moneda)}</td></tr>`).join('')}</tbody></table>`:'<p style="color:var(--color-text-muted);font-size:13px">Sin ítems</p>';openModal(`OC ${p.numero_oc}`,`<div class="detail-grid" style="margin-bottom:16px"><div class="detail-item"><div class="detail-label">Proveedor</div><div class="detail-value">${p.proveedor_nombre||'—'}</div></div><div class="detail-item"><div class="detail-label">Estado</div><div class="detail-value">${badge(p.estado)}</div></div><div class="detail-item"><div class="detail-label">Fecha emisión</div><div class="detail-value">${fmtDate(p.fecha_emision)}</div></div><div class="detail-item"><div class="detail-label">Entrega estimada</div><div class="detail-value">${fmtDate(p.fecha_entrega_estimada)}</div></div><div class="detail-item"><div class="detail-label">Incoterm</div><div class="detail-value">${p.incoterm||'—'}</div></div><div class="detail-item"><div class="detail-label">Puerto origen</div><div class="detail-value">${p.puerto_origen||'—'}</div></div><div class="detail-item"><div class="detail-label">Total</div><div class="detail-value" style="font-weight:700">${fmtMoney(p.importe_total,p.moneda)}</div></div></div>${p.observaciones?`<p style="margin-bottom:12px;font-size:13px;color:var(--color-text-muted)">${p.observaciones}</p>`:''}<div class="card-title" style="margin-bottom:8px">Ítems</div>${ih}`)}
+function cambiarEstadoPedido(id,ea){const es=['BORRADOR','CONFIRMADO','EN_PRODUCCION','EMBARCADO','EN_ADUANA','ENTREGADO','CANCELADO'];openModal('Cambiar estado',`<div class="form-group" style="margin-bottom:16px"><label>Estado actual: ${badge(ea)}</label><select id="nuevo-estado-ped" style="margin-top:8px">${es.map(e=>`<option value="${e}" ${e===ea?'selected':''}>${e}</option>`).join('')}</select></div><div class="form-actions"><button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="aplicarEstadoPedido(${id})">Actualizar</button></div>`)}
+function aplicarEstadoPedido(id){API.updatePedidoEstado(id,document.getElementById('nuevo-estado-ped').value);closeModal();showToast('Estado actualizado');renderTablaPedidos()}
+function formNuevoPedido(){const p=API.getProveedores({activo:true});openModal('Nueva Orden de Compra',`<form id="form-oc" onsubmit="guardarPedido(event)"><div class="form-grid"><div class="form-group"><label>N° OC *</label><input name="numero_oc" required placeholder="OC-2026-001"></div><div class="form-group"><label>Proveedor *</label><select name="proveedor_id" required><option value="">— Seleccionar —</option>${p.map(x=>`<option value="${x.id}">${x.codigo} — ${x.razon_social}</option>`).join('')}</select></div><div class="form-group"><label>Fecha emisión *</label><input name="fecha_emision" type="date" required value="${new Date().toISOString().slice(0,10)}"></div><div class="form-group"><label>Entrega estimada</label><input name="fecha_entrega_estimada" type="date"></div><div class="form-group"><label>Incoterm</label><select name="incoterm"><option value="">—</option>${['FOB','CIF','CFR','EXW','DAP','DDP','FCA'].map(i=>`<option>${i}</option>`).join('')}</select></div><div class="form-group"><label>Moneda</label><select name="moneda">${['USD','EUR','BRL','CNY'].map(m=>`<option>${m}</option>`).join('')}</select></div><div class="form-group"><label>Puerto origen</label><input name="puerto_origen" placeholder="Ej: Shanghai, Santos"></div><div class="form-group full"><label>Observaciones</label><textarea name="observaciones"></textarea></div></div><div class="form-actions"><button type="button" class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button type="submit" class="btn btn-primary">Crear OC</button></div></form>`)}
+function guardarPedido(e){e.preventDefault();API.savePedido(formData(e.target));closeModal();showToast('OC creada');renderTablaPedidos()}
+
+// ── Embarques ─────────────────────────────────────────────────────────────────
+function viewEmbarques(){document.getElementById('page-title').textContent='Embarques y Logística';document.getElementById('topbar-actions').innerHTML=`<button class="btn btn-primary" onclick="formNuevoEmbarque()"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Nuevo embarque</button>`;renderTablaEmbarques()}
+function renderTablaEmbarques(){const e=API.getEmbarques();window._embarques=e;document.getElementById('view-container').innerHTML=`<div class="filter-bar"><input type="search" id="buscar-emb" placeholder="Buscar embarque, BL, naviera..." oninput="filtrarEmbarques()" style="max-width:260px"><select id="filtro-estado-emb" onchange="filtrarEmbarques()"><option value="">Todos los estados</option>${['EN_TRANSITO','EN_PUERTO','EN_ADUANA','LIBERADO','ENTREGADO'].map(x=>`<option>${x}</option>`).join('')}</select></div><div class="card"><div class="table-wrap"><table id="tabla-embarques"><thead><tr><th>N° Embarque</th><th>OC</th><th>Proveedor</th><th>Tipo</th><th>BL/AWB</th><th>Naviera</th><th>Salida</th><th>ETA</th><th>Estado</th><th></th></tr></thead><tbody>${renderEmbarquesRows(e)}</tbody></table></div></div>`}
+function renderEmbarquesRows(e){if(!e.length)return`<tr><td colspan="10"><div class="empty-state"><p>No hay embarques registrados</p></div></td></tr>`;return e.map(x=>`<tr><td><strong>${x.numero_embarque}</strong></td><td>${x.numero_oc||'—'}</td><td>${x.proveedor_nombre||'—'}</td><td>${x.tipo_transporte}</td><td>${x.numero_bl_awb||'—'}</td><td>${x.naviera_transportista||'—'}</td><td>${fmtDate(x.fecha_embarque)}</td><td>${fmtDate(x.eta)} ${etaDaysLabel(x.eta)}</td><td>${badge(x.estado)}</td><td><button class="btn btn-ghost btn-sm" onclick="verEmbarque(${x.id})">Ver</button> <button class="btn btn-ghost btn-sm" onclick="cambiarEstadoEmbarque(${x.id},'${x.estado}')">Estado</button></td></tr>`).join('')}
+function filtrarEmbarques(){const b=document.getElementById('buscar-emb').value.toLowerCase(),e=document.getElementById('filtro-estado-emb').value;document.querySelector('#tabla-embarques tbody').innerHTML=renderEmbarquesRows(window._embarques.filter(x=>(!b||x.numero_embarque.toLowerCase().includes(b)||(x.numero_bl_awb||'').toLowerCase().includes(b)||(x.naviera_transportista||'').toLowerCase().includes(b))&&(!e||x.estado===e)))}
+function verEmbarque(id){const e=API.getEmbarque(id);const dh=e.documentos&&e.documentos.length?`<table><thead><tr><th>Tipo</th><th>N° Doc.</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>${e.documentos.map(d=>`<tr><td>${d.tipo_documento.replace(/_/g,' ')}</td><td>${d.numero_documento||'—'}</td><td>${fmtDate(d.fecha_emision)}</td><td>${badge(d.estado)}</td></tr>`).join('')}</tbody></table>`:'<p style="font-size:13px;color:var(--color-text-muted)">Sin documentos</p>';openModal(`Embarque ${e.numero_embarque}`,`<div class="detail-grid" style="margin-bottom:16px"><div class="detail-item"><div class="detail-label">OC vinculada</div><div class="detail-value">${e.numero_oc||'—'}</div></div><div class="detail-item"><div class="detail-label">Proveedor</div><div class="detail-value">${e.proveedor_nombre||'—'}</div></div><div class="detail-item"><div class="detail-label">Estado</div><div class="detail-value">${badge(e.estado)}</div></div><div class="detail-item"><div class="detail-label">Transporte</div><div class="detail-value">${e.tipo_transporte}</div></div><div class="detail-item"><div class="detail-label">BL / AWB</div><div class="detail-value">${e.numero_bl_awb||'—'}</div></div><div class="detail-item"><div class="detail-label">Contenedor</div><div class="detail-value">${e.contenedor||'—'}</div></div><div class="detail-item"><div class="detail-label">Naviera</div><div class="detail-value">${e.naviera_transportista||'—'}</div></div><div class="detail-item"><div class="detail-label">Puerto origen</div><div class="detail-value">${e.puerto_origen||'—'}</div></div><div class="detail-item"><div class="detail-label">Fecha embarque</div><div class="detail-value">${fmtDate(e.fecha_embarque)}</div></div><div class="detail-item"><div class="detail-label">ETA</div><div class="detail-value">${fmtDate(e.eta)} ${etaDaysLabel(e.eta)}</div></div><div class="detail-item"><div class="detail-label">Arribo real</div><div class="detail-value">${fmtDate(e.fecha_arribo_real)}</div></div><div class="detail-item"><div class="detail-label">Despachante</div><div class="detail-value">${e.despachante||'—'}</div></div><div class="detail-item"><div class="detail-label">Flete</div><div class="detail-value">${fmtMoney(e.flete_importe,e.flete_moneda||'USD')}</div></div></div><div class="card-title" style="margin-bottom:8px">Documentación</div>${dh}`)}
+function cambiarEstadoEmbarque(id,ea){const es=['EN_TRANSITO','EN_PUERTO','EN_ADUANA','LIBERADO','ENTREGADO'];openModal('Actualizar estado de embarque',`<div class="form-group" style="margin-bottom:12px"><label>Nuevo estado</label><select id="nuevo-estado-emb" style="margin-top:6px">${es.map(e=>`<option value="${e}" ${e===ea?'selected':''}>${e.replace(/_/g,' ')}</option>`).join('')}</select></div><div class="form-group"><label>Fecha arribo real (opcional)</label><input type="date" id="fecha-arribo"></div><div class="form-actions"><button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="aplicarEstadoEmbarque(${id})">Actualizar</button></div>`)}
+function aplicarEstadoEmbarque(id){API.updateEmbarqueEstado(id,document.getElementById('nuevo-estado-emb').value,document.getElementById('fecha-arribo').value||null);closeModal();showToast('Estado actualizado');renderTablaEmbarques()}
+function formNuevoEmbarque(){const p=API.getPedidos().filter(x=>!['ENTREGADO','CANCELADO'].includes(x.estado));openModal('Nuevo embarque',`<form id="form-emb" onsubmit="guardarEmbarque(event)"><div class="form-grid"><div class="form-group"><label>N° Embarque *</label><input name="numero_embarque" required placeholder="EMB-2026-001"></div><div class="form-group"><label>OC vinculada</label><select name="pedido_id"><option value="">— Sin OC —</option>${p.map(x=>`<option value="${x.id}">${x.numero_oc} — ${x.proveedor_nombre}</option>`).join('')}</select></div><div class="form-group"><label>Tipo transporte</label><select name="tipo_transporte">${['MARITIMO','AEREO','TERRESTRE','FLUVIAL'].map(t=>`<option>${t}</option>`).join('')}</select></div><div class="form-group"><label>Naviera / Transportista</label><input name="naviera_transportista"></div><div class="form-group"><label>BL / AWB</label><input name="numero_bl_awb"></div><div class="form-group"><label>Contenedor</label><input name="contenedor"></div><div class="form-group"><label>Puerto origen</label><input name="puerto_origen"></div><div class="form-group"><label>Fecha embarque</label><input name="fecha_embarque" type="date"></div><div class="form-group"><label>ETA</label><input name="eta" type="date"></div><div class="form-group"><label>Flete (USD)</label><input name="flete_importe" type="number" step="0.01"></div><div class="form-group"><label>Despachante</label><input name="despachante"></div><div class="form-group full"><label>Notas</label><textarea name="notas"></textarea></div></div><div class="form-actions"><button type="button" class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button type="submit" class="btn btn-primary">Registrar embarque</button></div></form>`)}
+function guardarEmbarque(e){e.preventDefault();const d=formData(e.target);if(d.flete_importe)d.flete_importe=Number(d.flete_importe);API.saveEmbarque(d);closeModal();showToast('Embarque registrado');renderTablaEmbarques()}
+
+// ── Documentación ─────────────────────────────────────────────────────────────
+const TIPOS_DOC=['FACTURA_COMERCIAL','PACKING_LIST','BL_AWB','CERTIFICADO_ORIGEN','DUA','LC','POLIZA_SEGURO','FITOSANITARIO','OTROS'];
+function viewDocumentos(){document.getElementById('page-title').textContent='Documentación Aduanera';document.getElementById('topbar-actions').innerHTML=`<button class="btn btn-primary" onclick="formNuevoDocumento()"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Registrar documento</button>`;renderTablaDocumentos()}
+function renderTablaDocumentos(){const d=API.getDocumentos();window._docs=d;document.getElementById('view-container').innerHTML=`<div class="filter-bar"><select id="filtro-tipo-doc" onchange="filtrarDocs()"><option value="">Todos los tipos</option>${TIPOS_DOC.map(t=>`<option>${t}</option>`).join('')}</select><select id="filtro-estado-doc" onchange="filtrarDocs()"><option value="">Todos los estados</option>${['PENDIENTE','RECIBIDO','VERIFICADO','OBSERVADO'].map(e=>`<option>${e}</option>`).join('')}</select></div><div class="card"><div class="table-wrap"><table id="tabla-docs"><thead><tr><th>Tipo</th><th>N° Documento</th><th>Embarque</th><th>OC</th><th>Fecha emisión</th><th>Vencimiento</th><th>Estado</th><th></th></tr></thead><tbody>${renderDocsRows(d)}</tbody></table></div></div>`}
+function renderDocsRows(d){if(!d.length)return`<tr><td colspan="8"><div class="empty-state"><p>No hay documentos registrados</p></div></td></tr>`;return d.map(x=>{const v=x.fecha_vencimiento&&x.fecha_vencimiento<new Date().toISOString().slice(0,10);return`<tr><td><strong>${x.tipo_documento.replace(/_/g,' ')}</strong></td><td>${x.numero_documento||'—'}</td><td>${x.numero_embarque||'—'}</td><td>${x.numero_oc||'—'}</td><td>${fmtDate(x.fecha_emision)}</td><td style="${v?'color:var(--color-danger);font-weight:600':''}">${fmtDate(x.fecha_vencimiento)}</td><td>${badge(x.estado)}</td><td><button class="btn btn-ghost btn-sm" onclick="cambiarEstadoDoc(${x.id},'${x.estado}')">Estado</button></td></tr>`}).join('')}
+function filtrarDocs(){const t=document.getElementById('filtro-tipo-doc').value,e=document.getElementById('filtro-estado-doc').value;document.querySelector('#tabla-docs tbody').innerHTML=renderDocsRows(window._docs.filter(d=>(!t||d.tipo_documento===t)&&(!e||d.estado===e)))}
+function cambiarEstadoDoc(id,ea){const es=['PENDIENTE','RECIBIDO','VERIFICADO','OBSERVADO'];openModal('Actualizar estado',`<div class="form-group" style="margin-bottom:12px"><label>Nuevo estado</label><select id="nuevo-estado-doc" style="margin-top:6px">${es.map(e=>`<option value="${e}" ${e===ea?'selected':''}>${e}</option>`).join('')}</select></div><div class="form-actions"><button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="aplicarEstadoDoc(${id})">Actualizar</button></div>`)}
+function aplicarEstadoDoc(id){API.updateDocumentoEstado(id,document.getElementById('nuevo-estado-doc').value);closeModal();showToast('Estado actualizado');renderTablaDocumentos()}
+function formNuevoDocumento(){const e=API.getEmbarques();openModal('Registrar documento',`<form id="form-doc" onsubmit="guardarDocumento(event)"><div class="form-grid"><div class="form-group"><label>Tipo de documento *</label><select name="tipo_documento" required><option value="">— Seleccionar —</option>${TIPOS_DOC.map(t=>`<option>${t}</option>`).join('')}</select></div><div class="form-group"><label>Embarque vinculado</label><select name="embarque_id"><option value="">— Sin embarque —</option>${e.map(x=>`<option value="${x.id}">${x.numero_embarque}</option>`).join('')}</select></div><div class="form-group"><label>N° Documento</label><input name="numero_documento"></div><div class="form-group"><label>Fecha emisión</label><input name="fecha_emision" type="date"></div><div class="form-group"><label>Fecha vencimiento</label><input name="fecha_vencimiento" type="date"></div><div class="form-group full"><label>Notas</label><textarea name="notas"></textarea></div></div><div class="form-actions"><button type="button" class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button type="submit" class="btn btn-primary">Registrar</button></div></form>`)}
+function guardarDocumento(e){e.preventDefault();const d=formData(e.target);if(d.embarque_id)d.embarque_id=Number(d.embarque_id);API.saveDocumento(d);closeModal();showToast('Documento registrado');renderTablaDocumentos()}
+
+// ── Facturas ──────────────────────────────────────────────────────────────────
+function viewFacturas(){document.getElementById('page-title').textContent='Facturas y Pagos';document.getElementById('topbar-actions').innerHTML=`<button class="btn btn-primary" onclick="formNuevaFactura()"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Nueva factura</button>`;renderTablaFacturas()}
+function renderTablaFacturas(){const f=API.getFacturas();window._facturas=f;const tp=f.filter(x=>['PENDIENTE','PARCIAL'].includes(x.estado_pago)).reduce((s,x)=>s+x.importe,0);document.getElementById('view-container').innerHTML=`<div class="filter-bar"><input type="search" id="buscar-fact" placeholder="Buscar factura o proveedor..." oninput="filtrarFacturas()" style="max-width:260px"><select id="filtro-estado-fact" onchange="filtrarFacturas()"><option value="">Todos los estados</option>${['PENDIENTE','PARCIAL','PAGADO'].map(e=>`<option>${e}</option>`).join('')}</select><div class="spacer"></div><div style="font-size:13px;color:var(--color-text-muted)">Total pendiente: <strong style="color:var(--color-danger)">${fmtMoney(tp,'USD')}</strong></div></div><div class="card"><div class="table-wrap"><table id="tabla-facturas"><thead><tr><th>N° Factura</th><th>Proveedor</th><th>OC</th><th>Fecha</th><th>Vencimiento</th><th>Importe</th><th>Pagado</th><th>Saldo</th><th>Estado</th><th></th></tr></thead><tbody>${renderFacturasRows(f)}</tbody></table></div></div>`}
+function renderFacturasRows(f){if(!f.length)return`<tr><td colspan="10"><div class="empty-state"><p>No hay facturas registradas</p></div></td></tr>`;return f.map(x=>{const s=x.importe-(x.pagado||0),v=x.fecha_vencimiento&&x.fecha_vencimiento<new Date().toISOString().slice(0,10)&&x.estado_pago!=='PAGADO';return`<tr><td><strong>${x.numero_factura}</strong></td><td>${x.proveedor_nombre||'—'}</td><td>${x.numero_oc||'—'}</td><td>${fmtDate(x.fecha_factura)}</td><td style="${v?'color:var(--color-danger);font-weight:600':''}">${fmtDate(x.fecha_vencimiento)}</td><td>${fmtMoney(x.importe,x.moneda)}</td><td>${fmtMoney(x.pagado||0,x.moneda)}</td><td style="${s>0?'color:var(--color-danger)':'color:var(--color-success)'}">${fmtMoney(s,x.moneda)}</td><td>${badge(x.estado_pago)}</td><td><button class="btn btn-ghost btn-sm" onclick="verFactura(${x.id})">Ver</button> ${x.estado_pago!=='PAGADO'?`<button class="btn btn-accent btn-sm" onclick="formRegistrarPago(${x.id})">Pagar</button>`:''}</td></tr>`}).join('')}
+function filtrarFacturas(){const b=document.getElementById('buscar-fact').value.toLowerCase(),e=document.getElementById('filtro-estado-fact').value;document.querySelector('#tabla-facturas tbody').innerHTML=renderFacturasRows(window._facturas.filter(f=>(!b||f.numero_factura.toLowerCase().includes(b)||(f.proveedor_nombre||'').toLowerCase().includes(b))&&(!e||f.estado_pago===e)))}
+function verFactura(id){const f=API.getFactura(id);const tp=(f.pagos||[]).reduce((s,p)=>s+p.importe,0);const ph=f.pagos&&f.pagos.length?`<table><thead><tr><th>Fecha</th><th>Forma</th><th>Referencia</th><th>Banco</th><th>Importe</th></tr></thead><tbody>${f.pagos.map(p=>`<tr><td>${fmtDate(p.fecha_pago)}</td><td>${p.forma_pago||'—'}</td><td>${p.numero_referencia||'—'}</td><td>${p.banco||'—'}</td><td>${fmtMoney(p.importe,p.moneda||'USD')}</td></tr>`).join('')}</tbody></table>`:'<p style="font-size:13px;color:var(--color-text-muted)">Sin pagos</p>';openModal(`Factura ${f.numero_factura}`,`<div class="detail-grid" style="margin-bottom:16px"><div class="detail-item"><div class="detail-label">Proveedor</div><div class="detail-value">${f.proveedor_nombre||'—'}</div></div><div class="detail-item"><div class="detail-label">Estado</div><div class="detail-value">${badge(f.estado_pago)}</div></div><div class="detail-item"><div class="detail-label">Fecha factura</div><div class="detail-value">${fmtDate(f.fecha_factura)}</div></div><div class="detail-item"><div class="detail-label">Vencimiento</div><div class="detail-value">${fmtDate(f.fecha_vencimiento)}</div></div><div class="detail-item"><div class="detail-label">Importe total</div><div class="detail-value" style="font-weight:700">${fmtMoney(f.importe,f.moneda)}</div></div><div class="detail-item"><div class="detail-label">Pagado</div><div class="detail-value" style="color:var(--color-success)">${fmtMoney(tp,f.moneda)}</div></div><div class="detail-item"><div class="detail-label">Saldo</div><div class="detail-value" style="color:var(--color-danger);font-weight:700">${fmtMoney(f.importe-tp,f.moneda)}</div></div><div class="detail-item"><div class="detail-label">T/C</div><div class="detail-value">${f.tipo_cambio?'Gs. '+Number(f.tipo_cambio).toLocaleString('es-PY'):'—'}</div></div></div><div class="card-title" style="margin-bottom:8px">Pagos</div>${ph}${f.estado_pago!=='PAGADO'?`<div style="margin-top:12px"><button class="btn btn-accent" onclick="closeModal();formRegistrarPago(${f.id})">Registrar pago</button></div>`:''}`)}
+function formRegistrarPago(fid){openModal('Registrar pago',`<form id="form-pago" onsubmit="guardarPago(event,${fid})"><div class="form-grid"><div class="form-group"><label>Fecha de pago *</label><input name="fecha_pago" type="date" required value="${new Date().toISOString().slice(0,10)}"></div><div class="form-group"><label>Importe *</label><input name="importe" type="number" step="0.01" required></div><div class="form-group"><label>Moneda</label><select name="moneda">${['USD','EUR','PYG'].map(m=>`<option>${m}</option>`).join('')}</select></div><div class="form-group"><label>Tipo de cambio (Gs.)</label><input name="tipo_cambio" type="number" step="1" placeholder="Ej: 7500"></div><div class="form-group"><label>Forma de pago</label><select name="forma_pago"><option value="">—</option>${['Transferencia','Carta de crédito','Cheque','Contado'].map(f=>`<option>${f}</option>`).join('')}</select></div><div class="form-group"><label>N° Referencia</label><input name="numero_referencia"></div><div class="form-group"><label>Banco</label><input name="banco"></div><div class="form-group full"><label>Notas</label><textarea name="notas"></textarea></div></div><div class="form-actions"><button type="button" class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button type="submit" class="btn btn-primary">Registrar pago</button></div></form>`)}
+function guardarPago(e,fid){e.preventDefault();const d=formData(e.target);d.importe=Number(d.importe);if(d.tipo_cambio)d.tipo_cambio=Number(d.tipo_cambio);API.registrarPago(fid,d);closeModal();showToast('Pago registrado');renderTablaFacturas()}
+function formNuevaFactura(){const p=API.getProveedores({activo:true}),peds=API.getPedidos();openModal('Nueva factura del exterior',`<form id="form-factura" onsubmit="guardarFactura(event)"><div class="form-grid"><div class="form-group"><label>N° Factura *</label><input name="numero_factura" required></div><div class="form-group"><label>Proveedor *</label><select name="proveedor_id" required><option value="">— Seleccionar —</option>${p.map(x=>`<option value="${x.id}">${x.razon_social}</option>`).join('')}</select></div><div class="form-group"><label>OC vinculada</label><select name="pedido_id"><option value="">— Sin OC —</option>${peds.map(x=>`<option value="${x.id}">${x.numero_oc}</option>`).join('')}</select></div><div class="form-group"><label>Fecha factura *</label><input name="fecha_factura" type="date" required></div><div class="form-group"><label>Fecha vencimiento</label><input name="fecha_vencimiento" type="date"></div><div class="form-group"><label>Moneda</label><select name="moneda">${['USD','EUR','BRL','CNY'].map(m=>`<option>${m}</option>`).join('')}</select></div><div class="form-group"><label>Importe *</label><input name="importe" type="number" step="0.01" required></div><div class="form-group"><label>Tipo de cambio (Gs.)</label><input name="tipo_cambio" type="number" step="1"></div><div class="form-group"><label>Forma de pago</label><select name="forma_pago"><option value="">—</option>${['Transferencia','Carta de crédito','Cheque','Contado'].map(f=>`<option>${f}</option>`).join('')}</select></div><div class="form-group full"><label>Notas</label><textarea name="notas"></textarea></div></div><div class="form-actions"><button type="button" class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button type="submit" class="btn btn-primary">Guardar factura</button></div></form>`)}
+function guardarFactura(e){e.preventDefault();const d=formData(e.target);d.importe=Number(d.importe);if(d.tipo_cambio)d.tipo_cambio=Number(d.tipo_cambio);if(d.proveedor_id)d.proveedor_id=Number(d.proveedor_id);if(d.pedido_id)d.pedido_id=Number(d.pedido_id);API.saveFactura(d);closeModal();showToast('Factura guardada');renderTablaFacturas()}
+
+// ── Router ────────────────────────────────────────────────────────────────────
+const VIEWS={dashboard:viewDashboard,proveedores:viewProveedores,pedidos:viewPedidos,embarques:viewEmbarques,documentos:viewDocumentos,facturas:viewFacturas};
+function navigate(v){document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view===v));const fn=VIEWS[v];if(fn)try{fn()}catch(err){document.getElementById('view-container').innerHTML=`<div class="alert alert-danger">Error: ${err.message}</div>`}}
+document.querySelectorAll('.nav-item').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();navigate(el.dataset.view)}));
+
+// ── Seed COMEX EN TRANSITO ────────────────────────────────────────────────────
+const SEED_VERSION='2026-06-20-v2';
+function seedInitialData(){
+  if(localStorage.getItem('semar_seed_version')===SEED_VERSION)return;
+  ['proveedores','pedidos','pedido_items','embarques','despachos','documentos','facturas','pagos'].forEach(t=>localStorage.removeItem('semar_'+t));
+  // 21 Proveedores
+  const PV={};
+  [['YATO','YATO','China'],
+   ['HYDRONLUBZ','HYDRONLUBZ IND. E COM. DE EQUIPAMENTOS LTDA','Brasil'],
+   ['VIPAL','VIPAL BORRACHAS S.A.','Brasil'],
+   ['SOGIANT','SO GIANT OIL SEAL','Taiwan'],
+   ['PERMATEX','PERMATEX INC.','USA'],
+   ['VISBELLA','VISBELLA','China'],
+   ['ROBUSTEC','ROBUSTEC','Brasil'],
+   ['MONTATIRE','MONTA TIRE','Brasil'],
+   ['PC','PC PRODUCTS INTERNATIONAL','Tailandia'],
+   ['CRC','CRC INDUSTRIES INC.','USA'],
+   ['TOPTUL','TOPTUL / ROTAR','Taiwan'],
+   ['KSS','KSS','Taiwan'],
+   ['BESTVALUE','BEST VALUE - GE','China'],
+   ['SCHWEERS','SCHWEERS','Brasil'],
+   ['AGEL','AGEL ANEIS GAXETAS EQUIPAMENTOS LTDA','Brasil'],
+   ['APG','APG','Argentina'],
+   ['DELTA','DELTA','Argentina'],
+   ['OVNISA','OVNISA','Argentina'],
+   ['NINGBO','NINGBO BLUEOCEAN','China'],
+   ['MAVE','MAVE BRASIL','Brasil'],
+   ['PATCH','PATCH (Parches)','China']
+  ].forEach(([c,r,p])=>{PV[c]=DB.insert('proveedores',{codigo:c,razon_social:r,pais:p,moneda:'USD',activo:1})});
+
+  // 6 Embarques EN TRANSITO
+  // [oc, pvCod, fechaEmision, eta, incoterm, importe, nEmbarque, naviera, nBL, fleteUSD, invoiceRef, gastosText, driveLink, pagado]
+  [
+    ['SVLM008827','CRC',      '2026-04-17','2026-06-24','LCL',   27840.20,'SVLM008827','ROLITRANS / MAERSK FORTALEZA 615S','SVLM008827',2230,   'Invoice 5010624814/5010623917','USD 8.352,06 / Gs. 55.958.802',     'https://drive.google.com/drive/folders/1TWDRWn_7dE2-JCOxVAEJ4bV9LMWXqhu1',true,'EN_ADUANA'],
+    ['SVLM009088','TOPTUL',   '2026-04-11','2026-06-25','FOB', 254546.70,'SVLM009088','ROLITRANS / COSCO',               'SVLM009088',null,   'PI2601000134',                'USD 76.364,01 / Gs. 511.638.867',    'https://drive.google.com/drive/folders/1jrmt7LaNRFYv7DyG5P8AIs1tFUNjwzjS', true],
+    ['PCP-2026-056','PC',     '2026-04-01','2026-07-22','CIF',  56422.55,'PCP-2026-056','CMA CGM',                      '2026-056',  null,   'PC-2026/056',                 'USD 16.926,77 / Gs. 113.409.326',    'https://drive.google.com/drive/folders/1spLhEk2p29hHjwu2_4BMhI7l92HqpRe5', true],
+    ['SVLM009357','VISBELLA', '2026-05-26','2026-08-18','FOB',  28510.32,'SVLM009357','ROLITRANS SVLM009357',            '26GNSEM0421',7413.80,'26GNSEM0421',                 'USD 8.553,10 / Gs. 57.305.743',      'https://drive.google.com/drive/folders/1JtLQVPGmwhswBt5_HOGkpfy1Fqf03eAW', true],
+    ['YATO-YET26140','YATO',  '2026-05-22','2026-08-25','FOB', 100195.19,'YATO-YET26140','ORLANDO',                    'YET26140',  null,   'Invoice YET26140',            'USD 30.058,56 / Gs. 201.392.332',    'https://drive.google.com/drive/folders/1KMe5KNGRX70h6azlEscScEmQ-WS9IZyo', true],
+    ['SVLM009610','TOPTUL',   '2026-05-22','2026-09-26','FOB', 479519.92,'SVLM009610','ROLITRANS SVLM009610',           'SVLM009610',null,   'PI2604-150 + PI2601-141',     'USD 143.855,98 / Gs. 963.835.039',   'https://drive.google.com/drive/folders/1BMoTjphgX6mkF4cNEb4r_W0rprN6ZRla', true],
+  ].forEach(([oc,pvk,fe,eta,inc,imp,svlm,nav,bl,flete,inv,gastos,dl,paid,estad])=>{
+    const pedEstad=estad==='EN_ADUANA'?'EN_ADUANA':'EMBARCADO';
+    const pid=DB.insert('pedidos',{numero_oc:oc,proveedor_id:PV[pvk],fecha_emision:fe,fecha_entrega_estimada:eta,incoterm:inc,moneda:'USD',importe_total:imp,estado:pedEstad,observaciones:inv+'. Gastos import: '+gastos});
+    const eid=DB.insert('embarques',{numero_embarque:svlm,pedido_id:pid,tipo_transporte:'MARITIMO',naviera_transportista:nav,numero_bl_awb:bl,fecha_embarque:fe,eta:eta,estado:estad||'EN_TRANSITO',flete_importe:flete,flete_moneda:'USD',despachante:'Rieder'});
+    if(dl)DB.insert('documentos',{tipo_documento:'BL_AWB',embarque_id:eid,pedido_id:pid,numero_documento:bl,fecha_emision:fe,estado:'RECIBIDO',notas:'Carpeta Drive: '+dl});
+    DB.insert('facturas',{numero_factura:oc,proveedor_id:PV[pvk],pedido_id:pid,fecha_factura:fe,moneda:'USD',importe:imp,estado_pago:paid?'PAGADO':'PENDIENTE',notas:inv});
+  });
+
+  // 3 Pedidos ORIGEN/PROFORMA (sin embarque todavía)
+  // [oc, pvCod, eta, importe, observaciones, driveLink]
+  [
+    ['SCH-PROFORMA-0626','SCHWEERS', '2026-06-25',  25251.40,'PROFORMA — anticipo pagado USD 25.251,40',null],
+    ['VIPAL-632752',     'VIPAL',    '2026-06-30',  69226.03,'Proforma 632752. Gastos est: USD 20.767,81 / Gs. 139.144.320','https://drive.google.com/drive/folders/1BcZ2VPIcaG69HErWT1q6hS6sHMWBlcuy'],
+    ['PERMATEX-PX1506',  'PERMATEX', '2026-09-26', 114039.63,'Pedido PX-1506. Gastos est: USD 34.211,89 / Gs. 229.219.656', 'https://drive.google.com/drive/folders/1GdcSCS_KBL7YOwQBquIlY8Ovd3WTXIFS'],
+  ].forEach(([oc,pvk,eta,imp,obs,dl])=>{
+    const pid=DB.insert('pedidos',{numero_oc:oc,proveedor_id:PV[pvk],fecha_emision:'2026-06-01',fecha_entrega_estimada:eta,moneda:'USD',importe_total:imp,estado:'CONFIRMADO',observaciones:obs+' — ORIGEN/PROFORMA'});
+    if(dl)DB.insert('documentos',{tipo_documento:'OTROS',pedido_id:pid,estado:'PENDIENTE',notas:'Carpeta Drive: '+dl});
+  });
+  localStorage.setItem('semar_seed_version',SEED_VERSION);
+  console.log('✅ COMEX EN TRANSITO v2 (2026-06-20): 21 proveedores, 9 pedidos, 6 embarques — CRC en ADUANA.');
+}
+
+function resetAndSeed(){
+  if(!confirm('¿Borrar todos los datos y recargar desde la hoja COMEX EN TRANSITO?'))return;
+  localStorage.removeItem('semar_seed_version');
+  seedInitialData();
+  navigate('dashboard');
+  showToast('Datos recargados ✅');
+}
+
+seedInitialData();
+navigate('dashboard');
+</script>
+</body>
+</html>

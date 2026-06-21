@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "SEMAR Comercio Exterior",
+      "runtimeExecutable": "powershell",
+      "runtimeArgs": ["-Command", "python -m http.server 5500 --directory 'C:\\Users\\Usuario\\Claude\\Projects\\Comercio Exterior SEMAR'"],
+      "port": 5500
+    }
+  ]
+}
