@@ -87,7 +87,14 @@ async function initDB() {
           .catch(() => ({ tabla, rows: [] }))
       )
     );
-    resultados.forEach(({ tabla, rows }) => { _cache[tabla] = rows; });
+    resultados.forEach(({ tabla, rows }) => {
+      // Deduplicar por id
+      const seen = new Set();
+      _cache[tabla] = rows.filter(r => {
+        if (!r.id || seen.has(r.id)) return false;
+        seen.add(r.id); return true;
+      });
+    });
     console.log('Datos cargados desde Google Sheets');
   } catch (err) {
     console.warn('Error al cargar Sheets, usando caché local:', err);
