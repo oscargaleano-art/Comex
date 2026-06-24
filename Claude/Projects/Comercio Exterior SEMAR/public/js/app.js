@@ -28,5 +28,5 @@ document.querySelectorAll('.nav-item').forEach(el => {
   });
 });
 
-// Arrancar en dashboard
-navigate('dashboard');
+// Arrancar: cargar datos de Sheets y luego mostrar dashboard
+initDB().then(() => navigate('dashboard'));
