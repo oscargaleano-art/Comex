@@ -124,9 +124,6 @@ textarea{resize:vertical;min-height:70px}
         <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>Facturas y Pagos
       </a>
     </nav>
-    <div style="padding:12px 16px;border-top:1px solid rgba(255,255,255,.1)">
-      <button onclick="resetAndSeed()" style="background:none;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.5);padding:6px 10px;border-radius:6px;font-size:11px;cursor:pointer;width:100%;text-align:left">↺ Recargar datos</button>
-    </div>
   </aside>
   <main class="main-content">
     <header class="topbar">
@@ -286,7 +283,8 @@ const VIEWS={dashboard:viewDashboard,proveedores:viewProveedores,pedidos:viewPed
 function navigate(v){document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view===v));const fn=VIEWS[v];if(fn)try{fn()}catch(err){document.getElementById('view-container').innerHTML=`<div class="alert alert-danger">Error: ${err.message}</div>`}}
 document.querySelectorAll('.nav-item').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();navigate(el.dataset.view)}));
 
-// ── Seed COMEX EN TRANSITO ────────────────────────────────────────────────────
+// ── Arranque ──────────────────────────────────────────────────────────────────
+/*
 const SEED_VERSION='2026-06-20-v2';
 function seedInitialData(){
   if(localStorage.getItem('semar_seed_version')===SEED_VERSION)return;
@@ -349,11 +347,8 @@ function seedInitialData(){
 
 function resetAndSeed(){
   if(!confirm('¿Borrar todos los datos y recargar desde la hoja COMEX EN TRANSITO?'))return;
-  localStorage.removeItem('semar_seed_version');
-  seedInitialData();
-  navigate('dashboard');
-  showToast('Datos recargados ✅');
-}
+*/
+// ─────────────────────────────────────────────────────────────────────────────
 
 initDB().then(()=>navigate('dashboard'));
 </script>
