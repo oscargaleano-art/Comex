@@ -1,18 +1,47 @@
-// Base de datos local usando localStorage
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMM3g96L1ThGD6lXgO3Y9EmE3QGruBrSsO48PRl8Tm43gwIh--AL-yeCiuyfupSzyRRQ/exec';
+const TABLAS = ['proveedores','pedidos','pedido_items','embarques','documentos','facturas','pagos','despachos'];
+
+// Cache en memoria — todas las lecturas son síncronas desde aquí
+const _cache = {};
+TABLAS.forEach(t => _cache[t] = []);
+
+function _parseRow(row) {
+  const obj = {};
+  for (const k in row) {
+    let v = row[k];
+    if (v === '' || v === null || v === undefined) { obj[k] = v === '' ? '' : null; continue; }
+    if (['id','proveedor_id','pedido_id','embarque_id','factura_id',
+         'importe','pagado','flete_importe','precio_unitario','cantidad',
+         'importe_total','tipo_cambio','importe_gs'].includes(k)) {
+      obj[k] = v === '' || v === null ? null : Number(v);
+    } else if (k === 'activo') {
+      obj[k] = v === true || v === 1 || v === '1' || v === 'true';
+    } else {
+      obj[k] = v;
+    }
+  }
+  return obj;
+}
+
+async function _syncTabla(tabla) {
+  await fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ accion: 'guardar', tabla, datos: _cache[tabla] }),
+    headers: { 'Content-Type': 'text/plain' }
+  });
+}
+
 const DB = {
-  _get(key) {
-    try { return JSON.parse(localStorage.getItem('semar_' + key) || '[]'); } catch { return []; }
-  },
+  _get(key) { return _cache[key] || []; },
   _set(key, data) {
-    localStorage.setItem('semar_' + key, JSON.stringify(data));
+    _cache[key] = data;
+    _syncTabla(key).catch(err => console.warn('Sync Sheets error:', err));
   },
   _nextId(key) {
     const items = this._get(key);
     return items.length ? Math.max(...items.map(i => i.id || 0)) + 1 : 1;
   },
   now() { return new Date().toISOString(); },
-
-  // CRUD genérico
   list(table, filters = {}) {
     let items = this._get(table);
     for (const [k, v] of Object.entries(filters)) {
@@ -36,16 +65,46 @@ const DB = {
     if (idx >= 0) { items[idx] = { ...items[idx], ...data, updated_at: this.now() }; this._set(table, items); }
     return idx >= 0;
   },
-  softDelete(table, id) {
-    return this.update(table, id, { activo: 0 });
-  }
+  softDelete(table, id) { return this.update(table, id, { activo: false }); }
 };
 
-// API simulada — misma interfaz que la versión con servidor
+// Carga inicial desde Google Sheets
+async function initDB() {
+  const container = document.getElementById('view-container');
+  if (container) container.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:16px">
+      <div style="width:40px;height:40px;border:3px solid #e2e8f0;border-top-color:#1a3a5c;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+      <p style="color:#64748b;font-size:14px">Conectando con Google Sheets...</p>
+    </div>
+    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>`;
+
+  try {
+    const resultados = await Promise.all(
+      TABLAS.map(tabla =>
+        fetch(`${SCRIPT_URL}?tabla=${tabla}`)
+          .then(r => r.json())
+          .then(rows => ({ tabla, rows: rows.map(_parseRow) }))
+          .catch(() => ({ tabla, rows: [] }))
+      )
+    );
+    resultados.forEach(({ tabla, rows }) => { _cache[tabla] = rows; });
+    console.log('Datos cargados desde Google Sheets');
+  } catch (err) {
+    console.warn('Error al cargar Sheets, usando caché local:', err);
+    // Fallback: intentar localStorage
+    TABLAS.forEach(t => {
+      try {
+        const local = localStorage.getItem('semar_' + t);
+        if (local && !_cache[t].length) _cache[t] = JSON.parse(local);
+      } catch {}
+    });
+  }
+}
+
+// API — misma interfaz para todas las vistas
 const API = {
-  // Dashboard
   getDashboard() {
-    const proveedores = DB.list('proveedores', { activo: 1 });
+    const proveedores = DB.list('proveedores').filter(p => p.activo);
     const pedidos = DB.list('pedidos');
     const embarques = DB.list('embarques');
     const facturas = DB.list('facturas');
@@ -72,34 +131,24 @@ const API = {
     })).sort((a, b) => (a.fecha_vencimiento || '9999') < (b.fecha_vencimiento || '9999') ? -1 : 1);
 
     return {
-      totales: {
-        proveedores: proveedores.length,
-        pedidos_activos: pedidosActivos.length,
-        embarques_activos: embarquesActivos.length,
-        deuda_total: deudaTotal
-      },
-      pedidos_por_estado,
-      embarques_activos: embActivos,
-      facturas_pendientes: factPend,
+      totales: { proveedores: proveedores.length, pedidos_activos: pedidosActivos.length, embarques_activos: embarquesActivos.length, deuda_total: deudaTotal },
+      pedidos_por_estado, embarques_activos: embActivos, facturas_pendientes: factPend,
       documentos_pendientes: documentos.filter(d => d.estado === 'PENDIENTE').length
     };
   },
 
-  // Proveedores
   getProveedores(filters = {}) {
-    let items = DB.list('proveedores');
-    if (filters.activo !== undefined) items = items.filter(p => p.activo === (filters.activo === 'true' || filters.activo === true ? 1 : 0));
+    let items = DB.list('proveedores').filter(p => p.activo);
     if (filters.pais) items = items.filter(p => p.pais === filters.pais);
-    return items.sort((a, b) => a.razon_social.localeCompare(b.razon_social));
+    return items.sort((a, b) => (a.razon_social||'').localeCompare(b.razon_social||''));
   },
   getProveedor(id) { return DB.get('proveedores', id); },
   saveProveedor(data, id = null) {
     if (id) { DB.update('proveedores', id, data); return id; }
-    return DB.insert('proveedores', { ...data, activo: 1 });
+    return DB.insert('proveedores', { ...data, activo: true });
   },
   deleteProveedor(id) { DB.softDelete('proveedores', id); },
 
-  // Pedidos
   getPedidos(filters = {}) {
     let items = DB.list('pedidos');
     if (filters.estado) items = items.filter(p => p.estado === filters.estado);
@@ -107,7 +156,7 @@ const API = {
     return items.map(p => {
       const prov = p.proveedor_id ? DB.get('proveedores', p.proveedor_id) : null;
       return { ...p, proveedor_nombre: prov?.razon_social, proveedor_pais: prov?.pais };
-    }).sort((a, b) => b.fecha_emision < a.fecha_emision ? -1 : 1);
+    }).sort((a, b) => (b.fecha_emision||'') < (a.fecha_emision||'') ? -1 : 1);
   },
   getPedido(id) {
     const p = DB.get('pedidos', id);
@@ -121,14 +170,11 @@ const API = {
     const { items, ...pedidoData } = data;
     const total = (items || []).reduce((s, i) => s + (i.cantidad * i.precio_unitario), 0);
     const id = DB.insert('pedidos', { ...pedidoData, estado: 'BORRADOR', importe_total: total });
-    if (items) {
-      items.forEach(item => DB.insert('pedido_items', { ...item, pedido_id: id }));
-    }
+    if (items) items.forEach(item => DB.insert('pedido_items', { ...item, pedido_id: id }));
     return id;
   },
   updatePedidoEstado(id, estado) { DB.update('pedidos', id, { estado }); },
 
-  // Embarques
   getEmbarques(filters = {}) {
     let items = DB.list('embarques');
     if (filters.estado) items = items.filter(e => e.estado === filters.estado);
@@ -148,14 +194,11 @@ const API = {
     e.despacho = DB.list('despachos').find(d => d.embarque_id === Number(id)) || null;
     return e;
   },
-  saveEmbarque(data) {
-    return DB.insert('embarques', { ...data, estado: 'EN_TRANSITO' });
-  },
+  saveEmbarque(data) { return DB.insert('embarques', { ...data, estado: 'EN_TRANSITO' }); },
   updateEmbarqueEstado(id, estado, fecha_arribo_real) {
     DB.update('embarques', id, { estado, ...(fecha_arribo_real ? { fecha_arribo_real } : {}) });
   },
 
-  // Documentos
   getDocumentos(filters = {}) {
     let items = DB.list('documentos');
     if (filters.embarque_id) items = items.filter(d => String(d.embarque_id) === String(filters.embarque_id));
@@ -165,14 +208,11 @@ const API = {
       const emb = d.embarque_id ? DB.get('embarques', d.embarque_id) : null;
       const ped = d.pedido_id ? DB.get('pedidos', d.pedido_id) : null;
       return { ...d, numero_embarque: emb?.numero_embarque, numero_oc: ped?.numero_oc };
-    }).sort((a, b) => b.created_at < a.created_at ? -1 : 1);
+    }).sort((a, b) => (b.created_at||'') < (a.created_at||'') ? -1 : 1);
   },
-  saveDocumento(data) {
-    return DB.insert('documentos', { ...data, estado: 'PENDIENTE' });
-  },
+  saveDocumento(data) { return DB.insert('documentos', { ...data, estado: 'PENDIENTE' }); },
   updateDocumentoEstado(id, estado) { DB.update('documentos', id, { estado }); },
 
-  // Facturas
   getFacturas(filters = {}) {
     let items = DB.list('facturas');
     if (filters.estado_pago) items = items.filter(f => f.estado_pago === filters.estado_pago);
@@ -181,7 +221,7 @@ const API = {
     return items.map(f => {
       const prov = f.proveedor_id ? DB.get('proveedores', f.proveedor_id) : null;
       const ped = f.pedido_id ? DB.get('pedidos', f.pedido_id) : null;
-      const pagado = pagos.filter(p => p.factura_id === f.id).reduce((s, p) => s + p.importe, 0);
+      const pagado = pagos.filter(p => p.factura_id === f.id).reduce((s, p) => s + (p.importe||0), 0);
       return { ...f, proveedor_nombre: prov?.razon_social, numero_oc: ped?.numero_oc, pagado };
     }).sort((a, b) => (a.fecha_vencimiento || '9999') < (b.fecha_vencimiento || '9999') ? -1 : 1);
   },
@@ -201,8 +241,7 @@ const API = {
   registrarPago(facturaId, pagoData) {
     DB.insert('pagos', { ...pagoData, factura_id: Number(facturaId) });
     const factura = DB.get('facturas', facturaId);
-    const totalPagado = DB.list('pagos').filter(p => p.factura_id === Number(facturaId)).reduce((s, p) => s + p.importe, 0);
-    const nuevoEstado = totalPagado >= factura.importe ? 'PAGADO' : 'PARCIAL';
-    DB.update('facturas', facturaId, { estado_pago: nuevoEstado });
+    const totalPagado = DB.list('pagos').filter(p => p.factura_id === Number(facturaId)).reduce((s, p) => s + (p.importe||0), 0);
+    DB.update('facturas', facturaId, { estado_pago: totalPagado >= factura.importe ? 'PAGADO' : 'PARCIAL' });
   }
 };
